@@ -6,6 +6,11 @@
 This report critically examines provided datasets which include criminal analysis across various financial years. The primary objective of the documentation is to explain the relationship within the datasets and also point out the relationship between big data and crime analysis. It aims to draft research questions after carefully reviewing the given dataset, perform some calculations on the dataset, and provide solutions to research questions. 
 In addition to addressing the research questions, the report focuses on the challenges associated with the use of big data solutions and the solutions provided in crime analysis. Upon highlighting the challenges, it offers strategic solutions adopted to mitigate against the known challenges. The approach used in the report ensures a thorough examination of the subject field, infusing both theoretical insights with practical knowledge.
 
+## Dataset Overview
+The dataset consists of multiple worksheets compiled into a single criminal workbook, spanning 13 financial years from 2012 to 2023. Each financial year contains approximately 27,000 rows and 8 columns with the following fields: Financial Year, Financial Quarter, Force Name, Offence Description, Offence Group, Offence Subgroup, Offence Code, and Number of Offences.
+
+For this project, I focused on the workbooks from the financial years 2014-15, 2015-16, 2021-22, and 2022-23. The selected worksheets were merged into a single comprehensive worksheet to streamline data access, cleaning, and preprocessing activities. This consolidation facilitates efficient management and analysis of the data, ensuring a more effective workflow for subsequent data processing and insights generation..
+
 ## Research Questions
 The following research questions below have been carefully drafted after an extensive review of the datasets provided. The aim is to address the positive and negative effects of big data analytics in crime analysis.
 1.	What are the most common types of offenses recorded in the database? What are the top five offenses in the dataset and what relevance does that cover in the criminal analysis?
@@ -16,6 +21,7 @@ The most common types of offenses are:
 •	Sexual offenses
 •	Robbery
 •	Public order offense
+
 The top five offenses are:
 •	Theft Offence
 •	Violence against the person
