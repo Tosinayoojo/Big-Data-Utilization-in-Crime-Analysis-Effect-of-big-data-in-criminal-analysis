@@ -1,0 +1,1220 @@
+---
+title: "DAT7006_2"
+author: '2312602'
+date: "2024-05-11"
+output:
+  word_document: 
+    toc: true
+    fig_caption: true
+    fig_height: 4
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.cap = "Figure: ")
+
+```
+
+## DAT7006 ASSESSMENT 2
+Pacman library package loads pacman::p_load(pacman, dplyr, GGally, ggplot2, ggthemes, ggvis, httr, lubridate, plotly, rio, rmarkdown, shiny, stringr, tidyr)
+
+Load library
+```{r}
+library(pacman)  # No message
+library(dplyr)
+```
+# 1. INTRODUCTION
+
+## 1.1 Background
+The introduction in big data, Machine Learning (ML) and Artificial Intelligence (AI) has brought about an increase in the number of technological solutions being developed in various industries. Some of these developments have led to significant leaps in understanding and forecasting weather conditions with an impact on business operations and the general wellbeing of communities. 
+As described by (Hayati and Mohebi, 2007), weather forecasting refers to using scientific techniques to predict the atmospheric condition over a specific period based on a specific location. Forecasting involves understanding current weather patterns but examining the relationship between the variables, making calculated estimates of the changes to expect in the future and constantly making changes to details through meteorological practices.
+The given dataset consists of 5452 rows and 2482 columns. The dataset contains Latitude (XLAT) and Longitude (XLONG) for different locations which will help in ensuring a targeted weather forecast. It also contains other meteorological variables such as Skin Temperature (TSK), Surface Pressure (PSFC), 2-meter specific Humidity (Q2), wind dynamics with the X and Y components of wind at 10 meters (U10 and V10), Convective Rain (Rainc), Non-convective Rain (RAINNC), Snow Water Equivalent (SNOW), Soil Temperature (TSLB) and Soil Moisture (SMOIS). Using data science techniques will help in determining the relationships between the variables identified in the dataset and this will further provide help in developing the models to be used for forecasting.
+
+Load the assessment dataset
+```{r}
+Assessment  <- read.csv("C:/WRFdata_May2018.csv", header = FALSE, skip = 1)
+
+```
+
+
+```{r}
+View(Assessment)
+
+```
+
+Rows and Column Count
+
+checking for nummber of rows and columns in the dataset
+```{r}
+ncol(Assessment)
+
+```
+
+
+```{r}
+nrow(Assessment)
+
+```
+Specify New Header
+Use row 2 as header while deleting row 1
+Remove the first row (used as header)
+
+```{r}
+names(Assessment) <- as.matrix(Assessment[1,])
+
+Assessment <- Assessment[-1,]
+```
+
+Check number of rows in the intial dataset
+```{r}
+nrow(Assessment)
+```
+
+check number of columns
+```{r}
+ncol(Assessment)
+```
+
+## 1.2 About Location - Sheffield
+After carefully reviewing the weather forecast dataset provided, the location Sheffield was identified from the Latitude (XLAT) and Longitude (XLONG) columns. The latitude 53.37 and longitude -1.448 was checked against Google maps and gave a result of Sheffield.
+Sheffield is a historically known city of industrialization popularly known for its steel industry which earned it its moniker “Steel City”. It is in South Yorkshire; England and its location suggests an exposure to varying weather conditions due to its northern latitude. The weather conditions of Sheffield changes over time ranging from mild to extreme conditions and this plays a critical role in industrial operations and optimization of resources. 
+The longitude and latitude row were identified as row 3587 and was extracted into a new data frame named Sheffield. The new data frame has 2,482 columns and 1 row. Upon extracting the new dataframe, the XLONG and XLAT columns was dropped giving us a total of 2,480 columns left.
+
+```{r}
+Sheffield <- Assessment[3587,]
+```
+
+
+```{r}
+View(Sheffield)
+```
+
+Check for number of columns
+```{r}
+ncol(Sheffield)
+```
+
+
+```{r}
+nrow(Sheffield)
+```
+remove the longitude and latitude column as they are no longer required
+```{r}
+Sheffield1 <- Sheffield[, -(1:2)]
+```
+
+check for number of columns left
+```{r}
+ncol(Sheffield1)
+```
+
+## 1.3 Significance of Sheffield
+Sheffield offers a growing level of industrialization coupled with its other thriving sectors such as agriculture, transportation, and urban relations. An understanding of the weather dynamics is crucial as this would aid in planning business operations, help with optimizing allocation of resources, ease of decision making while also ensuring the security of lives.
+
+
+## 1.4 Problem Statement
+The aim of this report is to review and analyze the weather forecast data for Sheffield using various meteorological parameters given in the dataset to understand the trends and patterns over time. Due to the uncertainty of the weather which can have negative impacts on productivity and operations in general. With the growing community in the city of Sheffield and increase in industrialization, it has become more significant to identify the weather patterns in the city. Conventional approaches to predicting or forecasting the weather patterns have proved unreliable often leading to reactive approaches and reduced productivity 
+
+## 1.5 Research Hypothesis
+The goal of this project is to develop an adequate time-series and machine learning model to be used for weather forecasting.
+After establishing the goal and reviewing the Sheffield dataset extracted, the following hypothesis were deduced.
+1. Null Hypothesis: There is a significant correlation between Convective rain (Accumulated precipitation) and 2- meter specific humidity.
+Alternative Hypothesis: There is no significant correlation between Convective rain (Accumulated precipitation) and 2- meter specific humidity.
+2. Null Hypothesis: There is a significant correlation between Surface Pressure (PSFC) and Wind Speed (U10).
+Alternative Hypothesis: There is no significant correlation between Surface Pressure (PSFC) and Wind Speed (U10).
+3. Null Hypothesis: There is a significant correlation between Surface Pressure (TSK) and Windspeed (WINDS)
+Alternative Hypothesis: There is no significant correlation between Surface Pressure (TSK) and Windspeed (WINDS).
+
+
+## 1,6 Research Questions
+The following research questions have been deduced after carefully reviewing the initial dataset, extracting the Sheffield location data into a new dataset.
+
+Some of the suggested research questions for this report include:
+1. What is the standard deviation of Surface temperature (TSK)?
+2. Is there a relationship between Surface Pressure (PSFC) and Wind Speed (U10)?
+3. Is there a relationship between Convective rain (Accumulated precipitation) and 2- meter specific humidity(Q2)?
+4. Is there a relationship between Surface Pressure or Skin Temperature (TSK) and Windspeed (WINDS)?
+5. is there a relationship between Soil Temperature (TSLB), Soil Moisture (SMOIS) and Surface Pressure or Skin Temperature (TSK)?
+6. What is the best model to use for time series forecasting?
+7. What is the best model to use for Machine learning?
+
+
+## 1.7 Significance of Data Analysis
+### 1.7.1 Rationale for data analysis
+Analyzing the meteorological variables in Sheffield dataset will provide insight into the relationships between the variables, an understanding of the historical trends therefore identifying trends or patterns and help develop machine learning and time series models to be used for forecasting purposes
+
+### 1.7.2. Stakeholders and why is analysis important for them?
+Some of the stakeholders in Sheffield include farmers, steel industries, hospitals, local authorities, government agencies, emergency response teams.
+
+Some of the stakeholders in Sheffield considered and why analysis is important to them are:
+1. Public Safety/ Health: The accuracy of weather forecasts helps businesses, communities, and their governments to prepare for extreme weather conditions, ensuring adequate response to minimize the effects. Occurrences like snowfalls, snow pellets, heatwaves, flood etc. People can take proactive measures to prevent such occurrences, thereby ensuring the safety and security of lives and properties.
+2.  Agriculture: Another major significance of choosing Sheffield is for its agricultural exploits. The surrounding countryside in Sheffield has good agricultural land which is used for growing crops, rearing livestock, and other agricultural produce. Accurate weather forecasts help farm businesses and owners make decisions on where to plant, fertilize their crops and harvest their yields which in turn leads to operational effectiveness and efficiency.
+3. Steel Industry: Sheffield is popularly known as the steel industry a lot of industrialization occurs in the city. From past experiences, weather conditions have played a major role in the steel industrialization and the accurate weather forecasts will lead to an optimization of resource utilization such as coal and water therefore leading to less downtimes in operations. Another thing to consider in the steel industry business is the supply chain process which involves the acquisition of materials, importing and exporting of goods and services. Accurate weather predictions allow businesses to make plans for changing weather conditions, therefore meeting customer needs, and ensuring no operational disruptions.
+4. Health: By analyzing weather conditions, patterns can be made regarding the nature of public health at different time intervals. Analyzing the trends can help make preventive decisions against illnesses such as infections, heat cramps, etc., that might occur at a particular period of time
+
+### 1.7.3. Impact on decision making?
+Considering some of the stakeholders mentioned above, some of the impact of data analysis on decision making include:
+1. Scheduling irrigation and planting seasons for farmers.
+2. Anticipate pest breakouts on farmlands and set proactive measures against them.
+2. Mitigating against road and rail network issues and dangers based on historical data.
+3. Ensuring operational effectiveness and efficiency in industries and businesses.
+4. Mitigating against risks associated with certain weather conditions for staff by setting up preventive measures.
+5. Resource optimization for organizations and government alike. Government can adequately make plans on where and when to allocate resources, when the resources need to be allocated and how many resources might be needed.
+
+
+
+# 2. LITERATURE REVIEW
+
+
+# 3. METHODOLOGY
+## 3.1 CRISP-DM Methodology
+
+“Cross Industry Standard Process for Data Mining” is regarded as a standard data science approach adopted to provide structure to the planning process involved in the projects, organizing of the project, and its implementation of the project.
+1. Business Understanding: This step involves understanding the problem, defining the aim and objectives, and proposed goal for weather forecasting. Sheffield is our focus and therefore the needs of Sheffield are considered in this phase of the project. Its desired goals and objectives are set, the expected outcomes are suggested, and the resources available for the project are listed.
+
+2. Data Understanding: This involves collecting and analyzing the Sheffield datasets. In this step, dataset exploration occurs, checking the relationship between the variables, and data quality is verified. In this phase, the Sheffield dataset is explored to understand the relationships that exist between the meteorological variables.
+
+3. Data preparation: Just as the step says, it involves preparing the dataset for modelling. Data preparation is the most critical part of each project, and it can be referred to as the data processing steps such as data restructuring, handling missing values, handling outliers, and creating new variables such as the Windspeed column.  Missing values are checked and handled, outliers are checked and confirmed if they are true outliers or not, and handled if they are. The windspeed is also calculated using the square root of the sum of the square of the x component of wind(U10) and the y component of wind (v10).
+4. Modelling: This phase involves using statistical analysis, machine learning techniques and time series techniques to analyze the trends and patterns observed in the dataset. The observations are then used to make predictions or forecasts. Data modelling involves selecting the preferred modelling techniques, splitting the dataset, training the model using the split data and eventually deploying the model trained.
+In machine learning, the restructured and pre-processed Sheffield dataset is split using the train test split, the modelling techniques are trained, and deployed.
+
+5. Evaluation: This phase involves checking the accuracy and reliability of the models deployed. This is used to confirm if the models deployed got a better result or not.  A low accuracy would suggest that the model deployed isn’t the best model to use. The root mean square error (RMSE) is used to evaluate the deployed models for machine learning, and the model with the least error is selected as the preferred model. The AIC score is used to determine the best model for time series forecasting.
+
+6. Deployment: Deployment phase involves taking the results of the models generated and integrating them into the stakeholders identified in Sheffield. The models are deployed into a production environment to help in weather forecasting. 
+
+
+
+# 4. DATA PRE-PROCESSING STEPS
+Data pre-processing are the steps taken to ensure data quality and data reliability. These are steps carried out to ensure a dataset is ready before analysis is carried out. This section of the report explores the pre-processing steps carried out before performing EDA and statistical analysis. Steps such as data cleaning, handling missing values using linear interpolation, checking for outliers using boxplot, printing out the list of outliers and crosschecking the printed list with the dataset if they are true outliers or not before handling them.
+
+
+## 4.1 Data Restructuring
+the dataset currently has 2480 columns with 10 identical column headers being constantly repeated. The dataset is to be re-arranged where each column head value is stacked one after the other. This is done by turning the elongated columns into rows of 10s with the values following one another.
+The code below attemppts to do this by spliting the dataframe into groups of 10s.
+```{r}
+Splitsheffield <- split.default (Sheffield1, rep(1:248, each = 10))
+```
+
+
+```{r}
+View(Splitsheffield)
+
+```
+Combine column names + Sheffiled
+Using lapply
+```{r}
+#using lapply
+Newshef <- lapply(Splitsheffield, function(x){
+  Newshef <- cbind(x)
+  colnames(Newshef) <- c("TSK",	"PSFC",	"U10",	"V10",	"Q2", "RAINC",	"RAINNC",	"SNOW",	"TSLB",	"SMOIS")
+  return(Newshef)})
+View(Newshef)
+```
+
+rbind is used to bind the respective column headers
+
+```{r}
+Sheffield2 <- do.call(rbind, Newshef)
+
+```
+
+```{r}
+View(Sheffield2)
+```
+check for number of rows in Sheffield 2
+```{r}
+nrow(Sheffield2)
+```
+Check for number of columns
+```{r}
+ncol(Sheffield2)
+```
+Check the characters
+```{r}
+str(Sheffield2)
+```
+To change the dataset to its actual character representation, type.convert is used as shown below
+```{r}
+Sheffield2[] <- lapply(Sheffield2, function(x) type.convert(as.character(x), as.is = FALSE))
+
+```
+check the new character
+```{r}
+str(Sheffield2)
+```
+
+check data summary
+```{r}
+summary(Sheffield2)
+```
+
+## 4.2 Missing Values
+### 4.2.1 Identify Missing values
+to check for missing values in a dataset, is.na("name of dataframe) is used as shown below.
+```{r}
+is.na(Sheffield2)
+```
+the output gives a general view of all the dataset and possible missing values.in the output above, missing values are represented with TRUE. This is because the code checks each row in the column to confirm if theres a missing value, it returns FALSE if there is no missing value and TRUE if any is identified.
+however, due to the volume of data being displayed, it can be confusing to identify all the missing values (TRUE). This method of identifying missing values is not the best approach as it can be misdirecting and time confusing.
+
+Therefore, we first try to find out the total number of missing values in the dataset as shown below
+```{r}
+sum(is.na(Sheffield2))
+```
+Upon identifying the total number of missing values in the dataset, the code is written to display the total number of missing values in each column as shown below.
+```{r}
+colSums(is.na(Sheffield2))
+```
+### 4.2.2 Visualize the missing values
+To visualize the missing values, the sum of missing values in each column is saved into a dataframe named Nullvalue, converts the null values vector to a regular vector that stores the count of missing values and stores that in the Nulldf dataframe. 
+```{r}
+Nullvalue <- colSums(is.na(Sheffield2)) #save the missing values in each column into a dataframe
+Nulldf <- tibble (variable = names(Nullvalue), missing = as.vector(Nullvalue))
+View(Nulldf) #view the dataframe
+```
+
+Upon saving the missing values identified into a dataframe, a bar chart is plotted to visualize the dataframe.
+```{r Plot 1, fig.cap=" Visualize Missing Values"}
+#intiate a barplot using ggplot
+
+library(ggplot2)
+ggplot(data = Nulldf, aes(x = variable, y = missing, fill = variable)) + geom_bar(stat = "identity") +
+  labs(x = "Null Values in each column", y = NULL, title = "Missing Values Visualization") +
+  scale_fill_manual(values = rainbow(nrow(Nulldf)))
+```
+
+### 4.2.3 Handle Missing values
+to handle missing values, the interpolate function is called.
+
+```{r}
+library(imputeTS) #using linear interpolate
+
+```
+the na_interpolation() function is called to handle missing values. Interpolation is the process of estimating the values of the missing values based on the values close or around the missing value.
+
+```{r}
+Sheffield2 <- na_interpolation(Sheffield2)
+```
+
+Check for the sum of missing values in each colum respectively after handling missing values
+```{r}
+colSums(is.na(Sheffield2))#check for the total sum of missing values in each columns
+```
+## 4.3 Outliers
+### 4.3.1 Detect Outliers
+Outliers are considered as datapoints that differ from the actual observations.
+There are different methods of detecting outliers, some of which are boxplot, scatterplot, etc.
+in this section of the report, boxplot is used to visualize the outliers.
+```{r}
+#TSK
+boxplot(Sheffield2$TSK, main = "TSK Boxplot")
+```
+
+
+```{r}
+hist(Sheffield2$TSK, main = "TSK Histogram")
+```
+
+
+```{r}
+#PSFC
+boxplot(Sheffield2$PSFC, main = "PSFC Boxplot")
+```
+Outliers are detected
+
+```{r}
+#U10
+boxplot(Sheffield2$U10, main = "U10 Boxplot")
+```
+Outliers are detected
+
+```{r}
+#V10
+boxplot(Sheffield2$V10, main = "V10 Boxplot")
+```
+Outliers are detected
+
+```{r}
+#Q2
+boxplot(Sheffield2$Q2, main = "Q2 Boxplot")
+```
+no outliers detected
+
+```{r}
+#RAINC
+boxplot(Sheffield2$RAINC, main = "RAINC Boxplot")
+```
+Outliers detected
+
+```{r}
+#RAINNC
+boxplot(Sheffield2$RAINNC, main = "RAINNC Boxplot")
+```
+Outliers detected
+
+```{r}
+#SNOW
+boxplot(Sheffield2$SNOW, main = "SNOW Boxplot")
+```
+no outliers detected.
+
+```{r}
+#TSLB
+boxplot(Sheffield2$TSLB, main = "TSLB Boxplot")
+```
+No Outlier detected
+```{r}
+#SMOIS
+boxplot(Sheffield2$SMOIS, main = "SMOIS Boxplot")
+```
+No Outlier detected.
+
+
+To confirm if the outliers detected in the visualization are true outliers, the code below attempts to print a list of all outliers identified in each column. The outlier list of each column is cheched against the actual dataset to confirm if they are true outliers and is needed to be handled or not.
+
+
+```{r}
+detect_outliers <- function(x) {
+  q1 <- quantile(x, 0.25, na.rm = TRUE)
+  q3 <- quantile(x, 0.75, na.rm = TRUE)
+  iqr <- q3 - q1
+  lower_bound <- q1 - 1.5 * iqr
+  upper_bound <- q3 + 1.5 * iqr
+  outliers <- x[x < lower_bound | x > upper_bound]
+  return(outliers)
+}
+
+# apply the defined function to each variable in the Sheffield2 dataset
+outliers <- lapply(Sheffield2, detect_outliers)
+
+# Print outliers for each column
+for (i in 1:length(outliers)) {
+  cat("Outliers in column", names(outliers)[i], ":", toString(outliers[[i]]), "\n")
+}
+```
+
+Outliers listed above is crossched against the dataset. Only RAINNC has true outliers as the results are far from the observations. To handle the outliers, the mean imputation method is used.
+
+```{r}
+library(Hmisc)
+```
+
+
+```{r}
+#handle outliers in RAINNC using Winsorization
+library(DescTools)
+
+```
+
+### 4.3.2 Handle Outliers
+
+```{r}
+# Calculate winsorization limits
+lower_limit <- quantile(Sheffield2$RAINNC, 0.05)
+upper_limit <- quantile(Sheffield2$RAINNC, 0.95)
+
+# Apply winsorization
+Sheffield2$RAINNC[Sheffield2$RAINNC < lower_limit] <- lower_limit
+Sheffield2$RAINNC[Sheffield2$RAINNC > upper_limit] <- upper_limit
+```
+
+plot a boxplot to check if the outliers have been handled
+```{r}
+boxplot(Sheffield2$RAINNC, main = "New RAINNC Boxplot")
+
+```
+To easily see the values of the handled outliers and compare against one another, print the detected outliers.
+```{r}
+detect_outliers2 <- function(x) {
+  q1 <- quantile(x, 0.25, na.rm = TRUE)
+  q3 <- quantile(x, 0.75, na.rm = TRUE)
+  iqr <- q3 - q1
+  lower_bound <- q1 - 1.5 * iqr
+  upper_bound <- q3 + 1.5 * iqr
+  outliers2 <- x[x < lower_bound | x > upper_bound]
+  return(outliers2)
+}
+
+## Apply the defined function to the 'RAINNC' column in the Sheffield2 dataset
+outliers2 <- detect_outliers2(Sheffield2$RAINNC)
+
+# Print outliers for the 'RAINNC' column
+cat("Outliers in column RAINNC:", toString(outliers2), "\n")
+```
+
+## 4.4 Windspeed
+To Calculate the value of winspeed, we make use of the U10 and V10 variable respectively.
+Windspeed is the squre root of the sum U10 Squared and V10 squared.
+sum = (U10 **2) + (V10 **2)
+Windspeed(WINDS) = Sqrt(sum)
+
+```{r}
+Sheffield3 <- Sheffield2 #create a copy of the dataset
+```
+
+```{r}
+Sheffield3$WINDS <- sqrt((Sheffield3$U10)**2 + (Sheffield3$V10)**2)
+View(Sheffield3)
+```
+
+# 5. EXPLORATORY DATA ANALYSIS
+Exploratory Data Analysis also known as EDA involves exploring relationships, understanding patterns, and peculiarities between variables. EDA is used to have an in-depth insight into the levels of distribution and structure of variables in a dataset.
+In this section of the report, the relationships between various variables are explored, outliers are detected, trends or patterns are established, correlation levels are checked, and visualizations are plotted 
+
+Descriptive Statistics
+The dplyr package for data manipulation.
+The summary() function to calculate summary statistics (including mean, median, quartiles, min, and max) for numerical variables in the dataset.
+Additionally, calculate mean, median, standard deviation, min, and max values for numerical variables using sapply() function.
+We combine the calculated summary statistics into a dataframe named summary_df.
+Finally, we print the summary_df dataframe to display the descriptive statistics for each numerical variable in the Sheffield dataset.
+
+```{r}
+# Display summary statistics for numerical variables
+Summarystats <- summary(Sheffield3)
+
+#USING SAPPLY
+# Display mean, median, standard deviation, min, max for numerical variables
+mean_values <- sapply(Sheffield3, mean, na.rm = TRUE)
+median_values <- sapply(Sheffield3, median, na.rm = TRUE)
+std_dev_values <- sapply(Sheffield3, sd, na.rm = TRUE)
+min_values <- sapply(Sheffield3, min, na.rm = TRUE)
+max_values <- sapply(Sheffield3, max, na.rm = TRUE)
+
+# Combine summary statistics into a dataframe
+summarydf <- data.frame(
+  Mean = mean_values,
+  Median = median_values,
+  StdDev = std_dev_values,
+  Min = min_values,
+  Max = max_values
+)
+
+# Print summary statistics
+print(summarydf)
+View(summarydf)
+```
+
+Correlation Matrix of Sheffield
+```{r}
+# Correlation analysis
+correlation_matrix <- cor(Sheffield3[, -c(1, 12)], use = "complete.obs")
+```
+```{r}
+# Visualization of correlation matrix
+require(corrplot)
+corrplot(correlation_matrix, method = "color", type = "lower", addCoef.col = "black", tl.col = "black", tl.srt = 45)
+```
+
+# 6. STATISTICAL ANALYSIS
+Statistical analsis involves performing experiments and tests to confirm the hypothesis and provide answers to the research questions
+
+## 6.1 Univariate Analysis
+Univariate analysis just like the name says deals with individual variables. It focuses on understanding the central tendencies, distributions, and variable variability
+
+### Q1. Describe TSK.
+```{r}
+summary(Sheffield3$TSK)
+```
+This shows the distribution and level of central tendency of the Surface Pressure (TSK).
+The min is the lowest record of TSK in the dataset.
+The first quartile means 25% of observations or records have a surface temperature lower than or equal to 282.9.
+The measure of central tendency is is 288.5.
+
+## 6.2 Bivariate Analysis
+Bivariate analysis works with two variables. It analyzes the relationships and dependencies between the pairs of variables. The methods of analyzing bivariate relationships are dependent on the type of dataset and variables we are working on. In this dataset, the variables are numerical. Scatterplot is used to plot the graph of the variables against one another while we use correlation to check the relationship between the said variables to find if there’s any significant relationship.
+
+### Q2. Is there a relationship between Surface Pressure (PSFC) and Wind Speed (U10) ?
+```{r}
+# Bivariate Analysis - Correlation between Surface Pressure (PSFC) and Wind Speed (U10)
+library(ggplot2)
+ggplot(Sheffield3, aes(x = PSFC, y = U10)) + geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +  # Add line of best fit
+  labs(x = "Surface Pressure (PSFC)", y = "Wind Speed (U10)", title = "Scatter Plot: PSFC vs. U10") +
+  theme_minimal()
+
+```
+To better understand the result of the graph, the correlation coefficent is calculated.
+```{r}
+# Correlation coefficient
+cor(Sheffield3$PSFC, Sheffield3$U10, method = 'spearman')
+
+```
+It is negatively correlated given the correlation coefficient between PSFC and U10 is less than 1. (< 1)
+Hypothesis: There is no significant correlation between Surface Pressure (PSFC) and Wind Speed (U10).
+
+
+### Q3. Is there a relationship between Convective rain (Accumulated precipitation) and 2- meter specific humidity ?
+```{r}
+ggplot(Sheffield3, aes(x = Q2, y = RAINC)) + geom_point() +
+  labs(x = "Specific Humidity (Q2)", y = "Convective Rain (RAINC)", title = "Scatter Plot: Q2 vs. RAINC") +
+  theme_minimal()
+```
+
+
+```{r}
+# Correlation coefficient
+cor.test(Sheffield3$Q2, Sheffield3$RAINC, method = 'spearman')
+```
+It is negatively correlated given result is less than 1(< 1) showing there is no relationship between Q2 and RAINC.
+Hypothesis: Accept Alternative Hypothesis as there is no correlation between Q2 and RAINC.
+
+
+### Q4. Is there a relationship between TSK and WINDS?
+```{r}
+# Scatter plots for selected pairs of variables : TSK - WINDS
+ggplot(Sheffield3, aes(x = TSK, y = WINDS)) +
+  geom_point() +
+  labs(x = "TSK", y = "WINDS", title = "Scatter Plot: TSK vs. WINDS")
+```
+
+
+```{r}
+# Correlation coefficient
+cor.test(Sheffield3$WINDS, Sheffield3$TSK, method = 'spearman')
+```
+There is no relationship between TSK and WINDS as it is negatively correlated given the result is less than 1.
+
+
+## 6.3. Multivariate Analysis
+Multivariate analysis involves analysis variables that are more than two simultaneously to understand the complexity, patterns, and interactions between the variables.
+
+### Q5. is there a relationship between TSLB, SMOIS and TSK?
+
+#### Multiple corellation
+```{r}
+#selected_data <- Sheffield[, c("TSK","RAINC", "SMOIS")]
+correlation_matrix <- cor(Sheffield3[, c("TSK","RAINC", "SMOIS")])
+multiple_correlation <- sqrt(det(correlation_matrix))
+print(multiple_correlation)
+```
+There is no relationship betwen TSLB, SMOIS and TSK as it is negatively correlated given the result is less than 1.
+
+
+#### Alternatively
+To give a more accurate result of the relationship between the variables.
+```{r}
+Multivariatedata <- Sheffield3[, c("TSK", "RAINC", "SMOIS")]
+
+```
+
+```{r}
+library(mvnormtest)
+```
+
+
+```{r}
+library(dplyr)
+glimpse(Multivariatedata)
+```
+```{r}
+mshapiro.test(t(Multivariatedata))
+```
+Shapiro test is used for Null Hypothesis. since the p value of the test is less than 0.05, we reject the Null hypothesis: there is a relationship between TSLB, SMOIS and TSK.
+The data is not normally distributed.
+
+Using ANOVA
+```{r}
+Anovaresult <- aov(TSK ~ RAINC + SMOIS , Multivariatedata)
+summary(Anovaresult)
+```
+RAINC and SMOIS have 1 degree of freedom each suggesting they are single predicator variables.
+RAINC has 0.4917 suggesting no statiscal significance.
+SMOIS has 0.0884 suggesting statistical significance, although it is marginal as it falls between 0.05 and 0.1.
+
+
+# 7. TIME-SERIES FORECASTING
+Time-series forecasting involves predicting future values based on past or historical data. For a dataset	 to be considered a time series dataset, it must contain data collected at different points in time. In this section of the report, ARIMA model and Auto ARIMA are employed to analyze the time series data. 
+
+## Q6. What is the best model to use for time series forecasting? 
+
+```{r}
+Sheffield4 <- Sheffield3 #create a copy for time series
+```
+
+## 7.1 Generate Timestamp
+Generate timestamps for time series starting 01,05,2018 at a 3 hour interval
+
+```{r}
+#Generate the sequence of timestamps with 3 hour intervals
+starttime <- as.POSIXct("2018-05-01 00:00:00", format = "%Y-%m-%d %H:%M:%S")
+
+#calculate end of timestamp
+endtime <- starttime + (nrow(Sheffield4)-1) * 3 * 3600
+
+#join timestamp
+Sheflocsequence <- seq(starttime, endtime, by = "3 hours")
+
+#Add the datetime column to the final dataframe
+Sheffield4$DATETIME <- Sheflocsequence
+```
+
+View the new dataset with DATETIME column
+
+```{r}
+head(Sheffield4,5)
+```
+check number of rows
+```{r}
+nrow(Sheffield4)
+```
+check number of columns
+```{r}
+ncol(Sheffield4)
+```
+Create a time series dataframe.
+Skin temprature has been selected as a major factor of choosing Sheffield.
+
+```{r}
+Sheffield5 <- Sheffield4[, c("TSK", "DATETIME")]
+```
+
+## 7.2 Plotting seasonal pattern
+```{r}
+#Seasonality plot against TSK - for Tosin
+ggplot(Sheffield5, aes(x = DATETIME, y = TSK)) + geom_line(color = "blue") +
+  labs(title = "TSK Seasonality", x = "Datetime", y ="TSK") + theme_minimal()
+
+```
+check for dataframe structure
+```{r}
+str(Sheffield5)
+```
+Check for missing values
+```{r}
+sum(is.na(Sheffield5))
+```
+
+Split the datetime column into data and time.
+```{r}
+# Extract date and time components separately
+Sheffield5$DATE <- format(Sheffield5$Datetime, "%Y-%m-%d")
+Sheffield5$TIME <- format(Sheffield5$Datetime, "%H:%M:%S")
+```
+
+Remove the initial datetime column
+```{r}
+#remove initial datetime column
+Sheffield5 <- subset(Sheffield5, select = c(-DATETIME))
+
+```
+
+check dataframe structure
+```{r}
+str(Sheffield5)
+```
+
+Create Copy of dataset
+```{r}
+Timeseriesdata <- Sheffield5[,c("TSK")] #Create a subset of TSK for timeseries analysis
+```
+
+## 7.3 Convert to a time series data
+The frequency specified is 8*31. 
+since data points were collected on a 3 -hour interval, we have 8 observations collected per day. and given its for a month time frame of 31 days.
+
+```{r}
+n_hours <- nrow(Timeseriesdata)
+
+Timeseriesdata <- ts(Timeseriesdata, start = 1, frequency = 8)
+
+```
+
+## 7.4 Seasonal Decompose
+```{r}
+plot(decompose(Timeseriesdata))
+```
+
+```{r}
+time(Timeseriesdata)
+
+```
+### 7.4.1 Visualize
+```{r}
+#Draw plot
+plot(Timeseriesdata)
+```
+
+## 7.5 Stationarity
+Check for stationarity of the time-series data
+
+```{r}
+library(tseries)
+
+# Perform the ADF test directly on the 'TSK' column
+adf_result2 <- adf.test(Timeseriesdata)
+
+# Print the ADF statistics and p-value
+print(paste("ADF Statistics:", adf_result2$statistic))
+```
+```{r}
+print(paste("p-value:", adf_result2$p.value))
+
+```
+
+```{r}
+# Interpret the results
+if (adf_result2$p.value < 0.05) {
+  print("Reject NULL Hypothesis, data is likely stationary.")
+} else {
+  print("Accept Null Hypothesis, data is likely not stationary.")
+}
+```
+As shown above, the Null hypothesis is accepted, data is not stationary which implies there is seasonality i.e differencing is needed to address stationarity.
+The p-value displayed above is greater than 0.05 meaning the data is not stationary.
+
+
+### 7.5.1 Differencing
+Differencing is technique in data science used to remove trends and seasonalities observed in a time series dataset.
+Using Ndifs to find out how many times i need to difference before the data is stationary.
+Estimates tARIMA differencing term
+
+```{r}
+library(forecast)
+ndiffs(Timeseriesdata, test = "adf")
+```
+The output above shows Zero(0) which suggests no need for differencing, however due to the result of the p-value which suggests the data is non stationary, differencing will be done once as it might be necessary for ARIMA Modelling. The result gotten would be analysed after differencing.
+
+Check length of timeseriesdata before differencing
+```{r}
+length(Timeseriesdata)
+```
+
+Auto correlation function is used for differencing
+
+```{r}
+tsdisplay(Timeseriesdata)
+```
+### 7.5.2 Autocorrelation Function (ACF)
+Auto correlation function (ACF) is used for differencing. 
+
+ACF shows the indirect effect while PACF shows the direct effect
+
+```{r}
+# Calculate 1st order difference
+Timeseriesdata1 <- diff(Timeseriesdata, lags = 1)
+```
+Order of differecing(d) = 1
+
+### 7.5.3 Visualize result
+```{r}
+plot(Timeseriesdata1, main = "1st Order Difference")
+```
+```{r}
+tsdisplay(Timeseriesdata1)
+```
+## 7.6 Recheck Stationarity
+```{r}
+# Perform the ADF test directly on the dataset
+adf.test(Timeseriesdata1)
+```
+The p value is 0.01 which is less than 0.05 meaning differencing the time series has made the time series data become stationary.
+
+## 7.7 Modelling
+Now that the data is stationary, we move to splitting the dataset into train and test dataset and deploy the ARIMA and Auto ARIMA Model. 
+
+### 7.7.1 Develop Model
+To perform ARIMA Modelling, the order of differencing (d), Autoregressive order(p) and Moving Average (q) which are gotten from the ACF and PACF plots.
+
+Autocorellation Function (ACF)
+```{r}
+acf(Timeseriesdata1)
+```
+....
+The Autocorrelation function (ACF) is used to identify the presence of a moving average (MA) by displaying the correlation between a timeseries and its lag values.
+The ACF shows a significant autocorrelation at all the bars which shows that at this lags there’s statistical and significant correlation with the values before the lag
+By observing the ACF plot above, significant spikes are observed with no rapid decrease. There is a consistent interval betwen the the spikes. The lags with spikes are recorded: 0.3, 0.7, 1, 1.5, 1.7, 2.5, 2.7, 3.7, 4, 4.3, 5, 5.3, 5.7, 6. 3, 6.7, 7, 7.7.
+
+The two consistent intervals between the observed values are 0.3 and 0.4, and the final result of finding the mode is 0.3 as shown below.
+
+```{r}
+# Given sequence of lags
+lago <- c(0.3, 0.7, 1, 1.5, 1.7, 2.5, 2.7, 3.7, 4, 4.3, 5, 5.3, 5.7, 6.3, 6.7, 7, 7.7)
+
+# Compute the differences between consecutive lags
+differencelag <- diff(lago)
+
+# Compute the frequency of each difference
+difference_freq <- table(differencelag)
+
+# Find the mode (most frequent difference)
+mode_difference <- names(difference_freq)[which.max(difference_freq)]
+
+# Print the mode difference
+print(mode_difference)
+
+```
+The Interval (i) is 0.3.
+
+
+Partial Autocorrelation Function (PACF)
+```{r}
+pacf(Timeseriesdata1)
+```
+PACF- bars that cut across are statistical  significant while the once that didn’t cut across the dotted line isn’t. So that means those are statistically significant has significant correlation with the values before lagging  even after removing effects of intervening correlations. Tt is observed there are significant values for p as they are above the confidence interval line.
+From the plot above, 10 significant spikes are observed at different lags but lag 11 and beyond fall within the confidence interval. The last lag before they fall beyond the confidence interval is lag 2.2.
+Our Autoregressive order(p) is lag 2.2
+p = 5.7
+
+```{r}
+tsdisplay(Timeseriesdata1)
+```
+...
+
+```{r}
+head(Timeseriesdata1)
+```
+Frequency is 3 meaning there are 8 observations per unit time.
+
+```{r}
+length(Timeseriesdata1)
+```
+Length of Timeseries data after differencing is 247.
+
+### 7.7.2 Split the dataset
+Unlike Machine learning where the split ratio is mentioned and data is split randomly, timeseries split is not random as it has to be specified. Tt takes the first half of the data based on the margin specified as train and the second half based on the margin left. 
+
+
+Training and Testing Dataset
+Specify the train and test data based on the amount of rows to be saved into each.
+To split the dataset, the first 200 rows are saved into a test dataframe and the remaining 47 rows are saved into a test dataframe
+```{r}
+# Convert the time series data into a time series object
+Timeseriesdata_ts <- ts(Timeseriesdata1, start = 1, frequency = 1)
+
+# Define the number of rows for training and testing
+train_rows <- 200
+test_rows <- 47
+
+# Split the time series object into training and test sets
+Tstraindata <- head(Timeseriesdata_ts, train_rows)
+Tstestdata <- tail(Timeseriesdata_ts, test_rows)
+```
+
+check training data length
+```{r}
+# Check the dimensions of the training and test sets
+print(length(Tstraindata))
+```
+check testing data length
+```{r}
+print(length(Tstestdata))
+```
+The code above is initiated to save the first 200 rows into into train and the remaining 47 rows as test dataset.
+
+### 7.7.3 AUTO-ARIMA
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(forecast)
+library(ggplot2)
+library(gridExtra)
+```
+
+Fit the model
+```{r}
+AAmodel <- auto.arima(Tstraindata)
+AAmodel
+```
+AIC = 945.69
+
+### 7.7.4 ARIMA
+To use the manual arima model, we need the values of p, d and q.
+p = Autoregressive order
+d = Order of differencing needed to achieve stationarity
+q = Moving Average(MA)
+i = interval (consistent interval observed)
+
+The values of p and d was observed and registerd from the order of differencing and PACF plot. However, the ACF plot shows significant lags with no rapid decrease in autocorrelation value suggesting persistent seasonality in the time series data and does not decay easily.
+To solve for the value of q, the consistent interval(i) value was gotten.
+
+The code below is used to calculate the value of q considering there is a consistent interval observed.
+
+```{r}
+# Determine the lag order (q) based on the consistent interval observed in the ACF plot
+interval <- 0.3 #Consister interval is observed every 0.3 lags
+
+#To find the moving average based on the reciprocal of the interval
+q <- round(1 / interval) - 1
+q
+```
+q = 2
+
+Fit the model
+```{r}
+library(stats)
+
+p <- 2.2 #observed from the PACF graph
+d <- 1 #order of differencing
+q <- 2 #calculated from the consistent intervals observed
+
+ARIMAmodel <- arima(Tstraindata, order = c(p, d, q))
+summary(ARIMAmodel)
+```
+AIC = 1152.37
+
+### 7.7.5 BEST MODEL - AUTO ARIMA
+
+```{r}
+AICArima = 1152.37
+AICAuto = 945.69
+
+if (AICArima < AICAuto){
+  print("Manua ARIMA Model is the best model")
+} else
+  print("Auto ARIMA Model is the best model")
+```
+Based on the AIC values observed, the manual Auto ARIMA model is the best model to use as it has an AIC value of 945.69 compared to the  ARIMA model that has an AIC value of AIC 1152.37.
+
+### 7.7.6 Forecast
+```{r}
+AAforecast <- forecast(AAmodel, h = length(Tstestdata))
+AAforecast
+```
+
+### 7.7.7 Evaluate
+```{r}
+# Evaluate the model
+AAaccuracy <- accuracy(AAforecast, Tstestdata)
+AAaccuracy
+```
+```{r}
+cat("The accuracy of the Auto ARIMA Model is:", AAaccuracy[,'RMSE'])
+```
+
+### 7.7.8 check residual
+```{r}
+checkresiduals(AAforecast)
+
+```
+There is significant autocorrelation present in the residuals of the model.
+
+
+# 8. MACHINE LEARNING
+Machine learning regression models are utilized in this section of the report to predict continuous variables such as surface temperature. Models such as linear regression model, random forest model, and Support Vector regression model are trained using the training dataset and deployed using the testing dataset for their predictive performance. After the models are deployed, the accuracy level for each model is checked and compares against one another to select the best model with the least error.
+
+```{r}
+library(caTools)
+set.seed(123) #set seeed for reproducability
+
+```
+
+Create a copy of sheffield dataset for ML
+```{r}
+Sheffieldml <- Sheffield4[,c("TSK", "PSFC", "Q2", "TSLB","SMOIS", "WINDS")]
+#create a copy of the dataset for ML
+
+str(Sheffieldml)
+```
+## 8.1 Split the dataframe
+Split the dataframe using 80/30 split
+```{r}
+splitdata <- sample.split(Sheffieldml, SplitRatio = 0.8)
+```
+
+Initiate training set and testing set
+```{r}
+mltrain <- Sheffieldml[splitdata,]
+mltest <- Sheffieldml[!splitdata,]
+```
+
+check for number of rows in each
+```{r}
+nrow(mltrain)
+```
+
+```{r}
+nrow(mltest)
+```
+the data has been split using 80/20 split. 80% of the data goes to the training model and the 20% goes to test model.
+
+Initiate X train, x test, y train, y test
+```{r}
+xtrain <- mltrain[,c("TSK", "PSFC", "Q2", "TSLB","SMOIS", "WINDS")]
+ytrain <- mltrain$TSK
+
+xtest <- mltest[,c( "TSK", "PSFC", "Q2", "TSLB","SMOIS", "WINDS")]
+ytest <- mltest$TSK
+```
+
+## 8.2 Linear Regression
+
+Initiate Regression Model
+```{r}
+Regressionmodel <- lm(TSK~., mltrain)
+summary(Regressionmodel)
+```
+#### 8.2.1 check for multiple regression
+```{r}
+summary(Regressionmodel)$r.squared
+```
+This indicates a strong relationship between the dependent and independent variables.
+
+
+#### 8.2.2 Correlation test
+```{r}
+cor(Sheffieldml)
+
+```
+
+#### 8.2.3 Multiple correlation
+```{r}
+par(mfrow = c(2,2))
+plot(Regressionmodel)
+```
+
+#### 8.2.4 Linearity
+```{r}
+pairs(Sheffieldml)
+```
+
+```{r}
+library(lmtest)
+raintest(Regressionmodel)
+```
+p-value of 0.2076 is greater than 0.05 meaning it is linear.
+
+#### 8.2.5 Heterocidacity
+```{r}
+library(car)
+ncvTest(Regressionmodel)
+```
+P value is 0.0020006 which is less than 0.05 meaning there is heterocidacity.
+
+#### 8.2.6 Normality
+```{r}
+shapiro.test(Regressionmodel$residuals) #p>0.05 so distribution is normal
+```
+P value is  0.0002169 which is less than 0.05, the distribution is not normal.
+
+
+#### 8.2.7 Autocorrelation of errors 
+```{r}
+#Durbin-Watson test
+library(lmtest)
+#null hypo: there is no autocorrelation (errors are independent)
+#alternate hypothesis: there is autocorrelation (errors are dependent)
+dwtest(Regressionmodel) #since p>0.05 - there is no autocorrelation
+```
+Since p value is 1.399e-05 which is less than 0.05, there is autocorrelation.
+
+#### 8.2.8 Multicolinearity
+```{r}
+vif(Regressionmodel) #vif>10 strong multicollinearity
+```
+No multicolinearitty found since all the VIF values are below 10.
+
+
+#### 8.2.9 LPredict
+```{r}
+lpredict <- predict(Regressionmodel, newdata = xtest)
+lpredict
+```
+
+## 8.3 Support Vector Regression
+```{r}
+library(caTools)
+library(e1071)
+set.seed(123)
+```
+
+### 8.3.1 Feature Scaling
+```{r}
+svrtrainset = scale(xtrain)
+svrtestset = scale(xtest)
+```
+
+### 8.3.2 Train Model
+```{r}
+SVRmodel <- svm( TSK ~ ., data = svrtrainset, type <- 'eps-regression', kernel <- 'linear')
+summary(SVRmodel)
+```
+
+### 8.3.3 SVRPredict
+```{r}
+svrpredict <- predict(SVRmodel, newdata = svrtestset)
+svrpredict
+```
+
+## 8.4 Random Forest Model
+```{r}
+# Load the required packages
+library(randomForest)
+```
+### 8.4.1 Train Model
+```{r}
+RFModel <- randomForest(y = ytrain, x =xtrain)
+RFModel
+```
+### 8.4.2 RFPredict
+```{r}
+RFpredict <- predict(RFModel, newdata = xtest)
+RFpredict
+```
+## 8.5 Model Evaluation
+
+### 8.5.1 Line.Reg RMSE
+```{r}
+RMSEReg <- sqrt(mean((ytest - lpredict)^2))
+cat("RMSE for Linear Regression:", RMSEReg)
+```
+
+### 8.5.2 SVR RMSE
+```{r}
+RMSEsvr <- sqrt(mean((ytest - svrpredict)^2))
+cat("RMSE for SVR:", RMSEsvr)
+```
+
+### 8.5.3 RF RMSE
+```{r}
+RMSErf <- sqrt(mean((ytest - RFpredict)^2))
+cat("RMSE for RF:", RMSErf)
+```
+### 8.5.4 Visualize
+```{r}
+# Adjust the width and height as needed
+options(repr.plot.width = 6, repr.plot.height = 8)
+
+# Define the RMSE values
+models <- c("Linear Regression", "SVR", "Random Forest")
+RMSE <- c(RMSEReg, RMSEsvr, RMSErf)
+
+# Create a bar plot
+barplot(RMSE, names.arg = models, col = "skyblue", main = "RMSE Comparison", xlab = "Regression Models", ylab = "RMSE")
+
+```
+
+```{r}
+# Determine the model with the least error
+min_error_model <- min(RMSEReg, RMSEsvr, RMSErf)
+
+if (min_error_model == RMSEReg) {
+    print("Linear Regression has the least error.")
+} else if (min_error_model == RMSEsvr) {
+    print("SVR has the least error.")
+} else {
+    print("Random Forest has the least error.")
+}
+
+```
+The preffered model to be used for prediction is the Random Forest model as it has the least amount of errors.
+
+# 9.0 DISCUSSION
+In this section, the findings are interpreted from the analysis. It points out the patterns, trends and relationships between the variables therefore answering our research questions and insights into the hypothesis.
+
+Discussion of Findings are:
+1. Reject Null Hypothesis 1: There is no significant correlation between Surface Pressure (PSFC) and Wind Speed (U10). The analysis rejects the null hypothesis, indicating a significant correlation between PSFC and U10. This suggests that changes in surface pressure are associated with variations in wind speed.
+2. Reject Null Hypothesis 2: There is no correlation between Q2 and RAINC. Similarly, the null hypothesis is rejected, indicating a correlation between Q2 and RAINC. This implies that changes in specific humidity are related to precipitation.
+3. Reject Null Hypothesis 3: There is no relationship between TSK and WINDS as it is negatively correlated given the result is less than 1. This suggests that higher surface temperatures are associated with lower wind speeds.
+4. Reject Null Hypothesis 4: There is no correlation between TSLB, SMOIS, and TSK, suggesting that higher soil temperatures and moisture levels are associated with lower surface temperatures. RAINC and SMOIS each have 1 degree of freedom, indicating they are single predictor variables. RAINC's p-value of 0.4917 suggests no statistical significance, while SMOIS's p-value of 0.0884 indicates statistical significance, albeit marginally, falling between 0.05 and 0.1, suggesting a moderate level of significance.
+5. The manual Auto ARIMA model is the best model to use as it has an AIC value of 945.69 compared to the ARIMA model that has an AIC value of 1152.37.
+6. Among the three models used, linear regression, random forest, and support vector regression (SVR), the preferred model for prediction is the Random Forest model as it has the least number of errors
+
+# 1.0 CONCLUSION
+The report began with a large dataset that comprised of different location data in terms of longitude and latitude and meteorological data. The location Sheffield was selected from the list of locations and the Sheffield data was restructured for analysis. Pre-processing of the dataset was also done by handling missing values and checking for outliers and if need be, handling them. This was done to ensure data reliability and security. Statistical analysis was also carried out which provided answers to the research questions and insights into accepting or rejecting the null hypothesis.
+Furthermore, Auto ARIMA model was selected as the optimal model for time series prediction, model was evaluated, and the residuals was checked. Also, the random forest model was selected as the best regression machine learning model for predicting meteorological phenomena.
+In conclusion, the best models to use in enhancing Sheffield weather forecast’s reliability and accuracy are Auto ARIMA time series model and the random forest model.
+
+# REFERENCES
+
